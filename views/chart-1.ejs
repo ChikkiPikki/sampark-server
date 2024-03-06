@@ -1,0 +1,49 @@
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  var ctx = new Chart(document.getElementById("myChart"), {
+    type: "line",
+    options: {
+      borderColor: "rgb(255,0,0)",
+      animation: {
+        duration: 0,
+      },
+      scales: {
+        y: {
+          min: 10,
+          max: 60,
+        },
+      },
+    },
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Temperature variation",
+          data: [],
+        },
+      ],
+    },
+  });
+
+  async function getData() {
+    socket.emit("get-temperature", 10);
+  }
+  var l = 1;
+  socket.on("temperature", (incoming) => {
+    incoming.forEach((entity) => {
+      console.log(entity);
+      ctx.data.labels.push(l);
+      ctx.data.datasets[0].data.push(entity.value);
+      if (ctx.data.labels.length > 10) {
+        ctx.data.datasets[0].data.shift();
+        ctx.data.labels.shift();
+      }
+      ctx.update();
+      l += 0.5;
+    });
+  });
+  setInterval(getData, 500);
+</script>

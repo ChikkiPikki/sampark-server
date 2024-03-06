@@ -1,0 +1,47 @@
+<div>
+  <canvas id="myChart3"></canvas>
+</div>
+<script>
+  var ctx3 = new Chart(document.getElementById("myChart3"), {
+    type: "line",
+    options: {
+      animation: {
+        duration: 0,
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 100,
+        },
+      },
+    },
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Gas sensor reading variation",
+          data: [],
+        },
+      ],
+    },
+  });
+
+  async function getGas() {
+    socket.emit("get-gas", 10);
+  }
+  var l = 1;
+  socket.on("gas", (incoming) => {
+    incoming.forEach((entity) => {
+      console.log(entity);
+      ctx3.data.labels.push(l);
+      ctx3.data.datasets[0].data.push(entity.value);
+      if (ctx3.data.labels.length > 10) {
+        ctx3.data.datasets[0].data.shift();
+        ctx3.data.labels.shift();
+      }
+      ctx3.update();
+      l += 0.5;
+    });
+  });
+  setInterval(getGas, 1000);
+</script>

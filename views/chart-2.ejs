@@ -1,0 +1,48 @@
+<div>
+  <canvas id="myChart2"></canvas>
+</div>
+<script>
+  var ctx2 = new Chart(document.getElementById("myChart2"), {
+    type: "line",
+    borderColor: "rgb(0,255,0)",
+    options: {
+      animation: {
+        duration: 0,
+      },
+      scales: {
+        y: {
+          min: 0,
+          max: 200,
+        },
+      },
+    },
+    data: {
+      labels: [],
+      datasets: [
+        {
+          label: "Distance variation",
+          data: [],
+        },
+      ],
+    },
+  });
+
+  async function getDataDistance() {
+    socket.emit("get-distance", 10);
+  }
+  var l = 1;
+  socket.on("distance", (incoming) => {
+    incoming.forEach((entity) => {
+      console.log(entity);
+      ctx2.data.labels.push(l);
+      ctx2.data.datasets[0].data.push(entity.value);
+      if (ctx2.data.labels.length > 20) {
+        ctx2.data.datasets[0].data.shift();
+        ctx2.data.labels.shift();
+      }
+      ctx2.update();
+      l += 0.5;
+    });
+  });
+  setInterval(getDataDistance, 500);
+</script>
